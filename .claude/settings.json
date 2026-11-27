@@ -1,0 +1,37 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/insights-guard.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"[engineering-insights] Before working: identify the module(s) this task touches or discusses (server, client, reviewer-core, e2e) and Read their Insights.md, then state in one line which entries apply (or 'No recorded insights apply').\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "You decide whether Claude must record engineering insights before stopping. Hook input JSON: $ARGUMENTS\n\nRules:\n1. If stop_hook_active is true, respond {\"ok\": true}.\n2. Read last_assistant_message. Respond {\"ok\": false, \"reason\": \"Run the engineering-insights skill: <one-line description of the insight>\"} ONLY if it reveals a SUBSTANTIAL, evidenced engineering insight in this repo (server, client, reviewer-core, e2e) in one of these categories: an idea to clarify or improve something, a potential problem, or a contradiction (code vs docs, docs vs docs, code vs tests, spec vs implementation) - AND the message does not say it was already recorded in an Insights.md.\n3. Otherwise (routine work, no new insight, insight already recorded, pure conversation) respond {\"ok\": true}.\nWhen in doubt, respond {\"ok\": true}. Respond with JSON only.",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

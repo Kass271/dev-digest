@@ -9,15 +9,19 @@ import type { PrMeta } from "@/lib/types";
 import { SIZE_COLOR, STATUS_META } from "../../constants";
 import { relativeTime, sizeOf } from "../../helpers";
 import { s } from "../../styles";
+import { CostBadge } from "@/components/cost-badge";
+import { CostBreakdownModal } from "../CostBreakdownModal";
 
 export function PRRow({ pr, repoId }: { pr: PrMeta; repoId: string }) {
   const t = useTranslations("prReview");
   const router = useRouter();
   const [h, setH] = React.useState(false);
+  const [costOpen, setCostOpen] = React.useState(false);
   const st = STATUS_META[pr.status] ?? STATUS_META.needs_review!;
   const { size, lines } = sizeOf(pr);
   const reviewed = pr.score != null; // null score ⇒ PR has never been reviewed
   return (
+    <>
     <div
       onMouseEnter={() => setH(true)}
       onMouseLeave={() => setH(false)}
@@ -58,7 +62,19 @@ export function PRRow({ pr, repoId }: { pr: PrMeta; repoId: string }) {
           {t(`list.status.${st.labelKey}`)}
         </Badge>
       </div>
+      <div>
+        <CostBadge
+          usd={pr.cost_usd}
+          label={t("cost.badgeLabel")}
+          onClick={(e) => {
+            e.stopPropagation(); // don't open the PR — open the cost breakdown
+            setCostOpen(true);
+          }}
+        />
+      </div>
       <div style={s.updatedCell}>{relativeTime(pr.updated_at)}</div>
     </div>
+    {costOpen && <CostBreakdownModal pr={pr} onClose={() => setCostOpen(false)} />}
+    </>
   );
 }

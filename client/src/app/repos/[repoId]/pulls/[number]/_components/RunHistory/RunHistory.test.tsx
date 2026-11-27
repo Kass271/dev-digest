@@ -25,6 +25,7 @@ function run(o: Partial<RunSummary>): RunSummary {
     duration_ms: 1000,
     tokens_in: 100,
     tokens_out: 50,
+    cost_usd: null,
     findings_count: 0,
     grounding: "0/0 passed",
     ran_at: "2026-06-11T18:44:34.000Z",
@@ -66,6 +67,17 @@ describe("RunHistory — outcome badge", () => {
   it("a failed run reads 'error'", () => {
     renderRuns([run({ status: "failed", error: "boom", score: null, blockers: null })]);
     expect(screen.getByText("error")).toBeInTheDocument();
+  });
+
+  it("shows the run cost right before the run time; em-dash when unknown", () => {
+    renderRuns([run({ status: "done", score: 61, cost_usd: 0.0013 })]);
+    const cost = screen.getByText("$0.001");
+    const time = screen.getByText(new Date("2026-06-11T18:44:34.000Z").toLocaleTimeString());
+    expect(cost.compareDocumentPosition(time) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    cleanup();
+
+    renderRuns([run({ status: "failed", error: "boom", cost_usd: null })]);
+    expect(screen.getByText("—")).toBeInTheDocument();
   });
 
   it("a running run reads 'running'", () => {

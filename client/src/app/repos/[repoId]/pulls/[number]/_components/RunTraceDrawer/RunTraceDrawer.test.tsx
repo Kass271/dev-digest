@@ -47,6 +47,23 @@ describe("A5 Run Trace drawer (smoke)", () => {
     expect(screen.getByText("Tool calls")).toBeInTheDocument();
   });
 
+  it("shows a COST stat between TOKENS and FINDINGS in the design format ($ + 2 dp)", () => {
+    TRACE.stats.cost_usd = 0.0612;
+    renderWithIntl(<RunTraceDrawer runId="r1" agentName="Security" prNumber={482} onClose={() => {}} />);
+    const tokens = screen.getByText("TOKENS");
+    const cost = screen.getByText("COST");
+    const findings = screen.getByText("FINDINGS");
+    expect(tokens.compareDocumentPosition(cost) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(cost.compareDocumentPosition(findings) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByText("$0.06")).toBeInTheDocument();
+    cleanup();
+
+    TRACE.stats.cost_usd = null; // legacy / unknown
+    renderWithIntl(<RunTraceDrawer runId="r1" agentName="Security" prNumber={482} onClose={() => {}} />);
+    expect(screen.getAllByText("—").length).toBeGreaterThan(0);
+    delete TRACE.stats.cost_usd;
+  });
+
   it("switches to the live log tab", () => {
     renderWithIntl(<RunTraceDrawer runId="r1" agentName="Security" prNumber={482} onClose={() => {}} />);
     fireEvent.click(screen.getByText("log"));

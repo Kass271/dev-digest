@@ -15,7 +15,37 @@ import {
   Settings,
   Repo,
   PrDetail,
+  PrMeta,
+  RunSummary,
+  RunStats,
 } from '@devdigest/shared';
+
+describe('run cost contract fields (server/Specs/run-cost.md)', () => {
+  const stats = { duration_ms: 1, tokens_in: 1, tokens_out: 1, findings: 0, grounding: '0/0' };
+  it('RunStats accepts cost_usd and legacy traces without it', () => {
+    expect(RunStats.parse({ ...stats, cost_usd: 0.0123 }).cost_usd).toBe(0.0123);
+    expect(RunStats.parse({ ...stats, cost_usd: null }).cost_usd).toBeNull();
+    expect(RunStats.parse(stats).cost_usd).toBeUndefined();
+  });
+  it('RunSummary requires cost_usd as number | null', () => {
+    const base = {
+      run_id: 'r', agent_id: null, agent_name: null, provider: null, model: null, status: 'done',
+      error: null, duration_ms: 1, tokens_in: 1, tokens_out: 1, findings_count: 0, grounding: null,
+      ran_at: null, score: null, blockers: null,
+    };
+    expect(RunSummary.parse({ ...base, cost_usd: 0.5 }).cost_usd).toBe(0.5);
+    expect(RunSummary.parse({ ...base, cost_usd: null }).cost_usd).toBeNull();
+    expect(RunSummary.safeParse(base).success).toBe(false);
+  });
+  it('PrMeta cost_usd is optional', () => {
+    const pr = {
+      number: 1, title: 't', author: 'a', branch: 'b', base: 'main', head_sha: 'x',
+      additions: 0, deletions: 0, files_count: 0, status: 'needs_review',
+    };
+    expect(PrMeta.parse(pr).cost_usd).toBeUndefined();
+    expect(PrMeta.parse({ ...pr, cost_usd: 0.014 }).cost_usd).toBe(0.014);
+  });
+});
 
 /**
  * Contract tests — parse/round-trip the fixtures from data.jsx/data2.jsx

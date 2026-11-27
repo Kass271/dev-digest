@@ -92,6 +92,7 @@
       "size": "Size",
       "score": "Score",
       "status": "Status",
+      "cost": "Cost",
       "updated": "Updated"
     },
     "filesCount": "{count} files",
@@ -105,5 +106,22 @@
     "goToReview": "Jump to this run’s findings below",
     "openTrace": "Open run trace & logs",
     "deleteRun": "Delete run"
+  },
+  "cost": {
+    "badgeLabel": "Cost of this review",
+    "modal": {
+      "title": "Cost · #{number}",
+      "latest": "Latest review",
+      "allRuns": "All runs",
+      "runsCount": "{count, plural, one {# run} other {# runs}}",
+      "unknownCount": "{count} with unknown cost",
+      "agent": "Agent",
+      "model": "Model",
+      "ranAt": "Ran at",
+      "tokens": "Tokens",
+      "cost": "Cost",
+      "empty": "No runs yet.",
+      "error": "Could not load runs."
+    }
   }
 }

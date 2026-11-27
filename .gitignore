@@ -23,3 +23,6 @@ test-results/
 
 # emdash worktree config (local)
 .emdash.json
+
+# feature-demo-pr skill: raw recordings
+.claude/skills/feature-demo-pr/out/
