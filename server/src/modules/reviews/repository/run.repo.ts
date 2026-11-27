@@ -59,6 +59,7 @@ export async function listRunsForPull(
     duration_ms: run.durationMs,
     tokens_in: run.tokensIn,
     tokens_out: run.tokensOut,
+    cost_usd: run.costUsd ?? null,
     findings_count: run.findingsCount,
     grounding: run.grounding,
     ran_at: run.ranAt ? run.ranAt.toISOString() : null,
@@ -146,6 +147,8 @@ export async function completeAgentRun(
     durationMs: number;
     tokensIn: number;
     tokensOut: number;
+    /** Run cost in USD from reviewer-core; null/omitted = unknown (failed/cancelled, unpriced model). */
+    costUsd?: number | null;
     findingsCount: number;
     grounding: string;
     /** Review score (0-100); null on failed/cancelled runs. */
@@ -163,6 +166,7 @@ export async function completeAgentRun(
       durationMs: values.durationMs,
       tokensIn: values.tokensIn,
       tokensOut: values.tokensOut,
+      costUsd: values.costUsd ?? null,
       findingsCount: values.findingsCount,
       grounding: values.grounding,
       score: values.score ?? null,
@@ -182,5 +186,15 @@ export async function saveRunTrace(db: Db, runId: string, trace: RunTrace): Prom
 
 export async function getRunTrace(db: Db, runId: string): Promise<RunTrace | undefined> {
   const [row] = await db.select().from(t.runTraces).where(eq(t.runTraces.runId, runId));
-  return row ? (row.trace as RunTrace) : undefined;
+  if (!row) return undefined;
+  const trace = row.trace as RunTrace;
+  // Traces written before cost tracking have no stats.cost_usd — fall back to the run row.
+  if (trace.stats && trace.stats.cost_usd === undefined) {
+    const [run] = await db
+      .select({ costUsd: t.agentRuns.costUsd })
+      .from(t.agentRuns)
+      .where(eq(t.agentRuns.id, runId));
+    return { ...trace, stats: { ...trace.stats, cost_usd: run?.costUsd ?? null } };
+  }
+  return trace;
 }

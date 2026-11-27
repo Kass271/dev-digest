@@ -1,0 +1,9 @@
+{
+  "name": "feature-demo-pr-recorder",
+  "private": true,
+  "type": "module",
+  "description": "Local Playwright for the feature-demo-pr skill (not part of the app).",
+  "dependencies": {
+    "playwright": "1.65.1"
+  }
+}

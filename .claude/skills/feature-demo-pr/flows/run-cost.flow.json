@@ -1,0 +1,43 @@
+{
+  "name": "Run cost — PR list column, timeline, trace drawer, breakdown modal",
+  "spec": ["server/Specs/run-cost.md", "client/Specs/run-cost.md"],
+  "steps": [
+    { "do": "goto", "path": "/" },
+    { "do": "waitUrl", "contains": "/pulls" },
+    { "do": "waitText", "text": "Add rate limiting to public API endpoints" },
+    { "do": "caption", "text": "PR list: new Cost column — no agent run yet, so cost is unknown (—)" },
+    { "do": "pause", "ms": 2500 },
+
+    { "do": "click", "text": "Add rate limiting to public API endpoints", "note": "open PR #482" },
+    { "do": "waitUrl", "contains": "/pulls/482" },
+    { "do": "caption", "text": "Run a real review with one agent (OpenRouter · deepseek-v4-flash)" },
+    { "do": "pause", "ms": 1500 },
+    { "do": "click", "role": "button", "name": "Run Review" },
+    { "do": "pause", "ms": 800 },
+    { "do": "click", "text": "General Reviewer", "exact": true },
+    { "do": "caption", "text": "Review running… cost is computed from real token usage" },
+    { "do": "waitText", "regex": true, "text": "^\\$\\d+\\.\\d{2,3}$", "timeout": 240000, "note": "cost badge appears on the finished run" },
+    { "do": "caption", "text": "Timeline: run cost shown right before the run time" },
+    { "do": "pause", "ms": 3000 },
+
+    { "do": "click", "role": "button", "name": "Open run trace & logs" },
+    { "do": "waitText", "text": "COST", "exact": true },
+    { "do": "caption", "text": "Run trace drawer: COST stat between Tokens and Findings (design format, 2 decimals)" },
+    { "do": "pause", "ms": 3500 },
+    { "do": "press", "key": "Escape" },
+
+    { "do": "goto", "path": "/" },
+    { "do": "waitUrl", "contains": "/pulls" },
+    { "do": "click", "role": "button", "name": "Reviewed", "exact": true, "note": "list defaults to 'Needs review'; PR #482 is now reviewed" },
+    { "do": "waitText", "role": "button", "regex": true, "name": "Cost of this review: \\$" },
+    { "do": "caption", "text": "PR list: Cost column now shows the latest review cost" },
+    { "do": "pause", "ms": 2500 },
+    { "do": "click", "role": "button", "regex": true, "name": "Cost of this review: \\$", "note": "open breakdown" },
+    { "do": "waitText", "text": "Cost · #482" },
+    { "do": "caption", "text": "Cost breakdown: every run, latest review vs all-runs total" },
+    { "do": "pause", "ms": 4000 },
+    { "do": "click", "role": "button", "name": "Close" },
+    { "do": "caption", "text": "Run cost — done" },
+    { "do": "pause", "ms": 1500 }
+  ]
+}
